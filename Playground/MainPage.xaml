@@ -2,14 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:m="clr-namespace:Maui.Material;assembly=Maui.Material"
-             x:Class="Playground.MainPage" Padding="48"
+             x:Class="Playground.MainPage" Padding="0"
              Shell.BackgroundColor="{DynamicResource Surface2}"
              BackgroundColor="{DynamicResource Background}">
     <m:Material
-        Elevation="6"
-        CornerRadius="38"
-        Color="{DynamicResource PrimaryContainer}"
-        SurfaceTintColor="{DynamicResource OnPrimaryContainer}"
-        ShadowColor="{DynamicResource Shadow}">
+        Elevation="0"
+        CornerRadius="100, 100, 0, 100"
+        Color="{DynamicResource SurfaceVariant}"
+        SurfaceTintColor="{DynamicResource OnSurface}"
+        ShadowColor="{DynamicResource Shadow}" Padding="20" HorizontalOptions="Center" VerticalOptions="Center">
+        <!--<Grid>
+            <Image Source="file://C:\Users\ragan\OneDrive\Untitled.png" InputTransparent="True" ZIndex="0" Opacity=".5" Aspect="AspectFit" />
+        </Grid>-->
+        <Label Text="Hello, World!" TextColor="{DynamicResource OnSurface}" InputTransparent="True" />
+        <!--<Image Source="https://i.redd.it/8ygn2eoe8p0a1.jpg" InputTransparent="True" ZIndex="0" Aspect="Fill" Opacity=".5" />-->
     </m:Material>
 </ContentPage>
