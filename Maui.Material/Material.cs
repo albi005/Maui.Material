@@ -4,115 +4,180 @@ using SkiaSharp.Views.Maui.Controls;
 
 namespace Maui.Material;
 
-public partial class Material : Layout
+public abstract partial class Material : Layout
 {
-    public static readonly BindableProperty ColorProperty = BindableProperty.Create(nameof(Color), typeof(Color), typeof(Material), propertyChanged: Invalidate);
-    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(nameof(CornerRadius), typeof(CornerRadius), typeof(Material), propertyChanged: Invalidate);
-    public static readonly BindableProperty ElevationProperty = BindableProperty.Create(nameof(Elevation), typeof(float), typeof(Material), propertyChanged: OnElevationPropertyChanged);
-    public static readonly BindableProperty ShadowColorProperty = BindableProperty.Create(nameof(ShadowColor), typeof(Color), typeof(Material), propertyChanged: Invalidate);
-    public static readonly BindableProperty SurfaceTintColorProperty = BindableProperty.Create(nameof(SurfaceTintColor), typeof(Color), typeof(Material), propertyChanged: Invalidate);
-
-    private readonly SKCanvasView _canvasView;
-    private readonly Animated _elevation;
+    private readonly SKCanvasView _materialCanvasView;
+    private readonly SKCanvasView _overlayCanvasView;
+    private readonly AnimatedFloat _elevation;
+    private readonly AnimatedCornerRadius _cornerRadius;
+    private readonly AnimatedColor _color;
+    private readonly AnimatedColor _surfaceTintColor;
+    private readonly AnimatedColor _stateOverlayColor;
+    private readonly AnimatedColor _shadowColor;
+    private readonly AnimatedFloat _stateOverlayOpacity;
+    private readonly SKPoint[] _cornerRadii = new SKPoint[4];
 
     private SKPoint _touchPoint;
     private float _rippleProgressIn;
     private float _rippleProgressOut;
-    private bool _prevInContact;
-    private SKRoundRect? _rrect;
 
     public Material()
-    {
-        _canvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true };
-        _elevation = new(this, _canvasView.InvalidateSurface, 0, 0, 12, 150);
-        _canvasView.PaintSurface += Draw;
-        _canvasView.Touch += OnTouch;
-        Children.Add(_canvasView);
+    {        
+        _materialCanvasView = new() { IgnorePixelScaling = true };
+        _materialCanvasView.PaintSurface += (_, e) =>
+        {
+            SKCanvas canvas = e.Surface.Canvas;
+            canvas.Translate(40, 40);
+            DrawBackground(canvas);
+        };
+        Children.Add(_materialCanvasView);
+
+        _overlayCanvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true, ZIndex = 1 };
+        _overlayCanvasView.PaintSurface += (_, e) =>
+        {
+            SKCanvas canvas = e.Surface.Canvas;
+            canvas.Translate(40, 40);
+            DrawOverlay(canvas);
+        };
+        _overlayCanvasView.Touch += OnTouch;
+        Children.Add(_overlayCanvasView);
+
+        _elevation = new(this, _materialCanvasView.InvalidateSurface, 0, 180);
+        _cornerRadius = new(this, () =>
+        {
+            static SKPoint CreatePoint(double xy) => new((float)xy, (float)xy);
+            _cornerRadii[0] = CreatePoint(CornerRadius.TopRight);
+            _cornerRadii[1] = CreatePoint(CornerRadius.TopLeft);
+            _cornerRadii[2] = CreatePoint(CornerRadius.BottomRight);
+            _cornerRadii[3] = CreatePoint(CornerRadius.BottomLeft);
+            UpdateBoundingRect();
+            _materialCanvasView.InvalidateSurface();
+        }, new(), 180);
+        _color = new(this, _materialCanvasView.InvalidateSurface, SKColor.Empty, 180);
+        _surfaceTintColor = new(this, _materialCanvasView.InvalidateSurface, SKColor.Empty, 180);
+        _stateOverlayColor = new(this, _overlayCanvasView.InvalidateSurface, SKColor.Empty, 180);
+        _shadowColor = new(this, _materialCanvasView.InvalidateSurface, SKColor.Empty, 180);
+        _stateOverlayOpacity = new(this, _overlayCanvasView.InvalidateSurface, 0, 180);
     }
-    
+
     public float Elevation
     {
-        get => (float)GetValue(ElevationProperty);
-        set => SetValue(ElevationProperty, value);
+        get => _elevation.Current;
+        set => _elevation.Target = value;
     }
 
     public CornerRadius CornerRadius
     {
-        get => (CornerRadius)GetValue(CornerRadiusProperty);
-        set => SetValue(CornerRadiusProperty, value);
+        get => _cornerRadius.Current;
+        set => _cornerRadius.Target = value;
     }
 
-    public Color? Color
+    public SKColor Color
     {
-        get => (Color)GetValue(ColorProperty);
-        set => SetValue(ColorProperty, value);
+        get => _color.Current;
+        set => _color.Target = value;
     }
 
-    public Color? SurfaceTintColor
+    public SKColor SurfaceTintColor
     {
-        get => (Color)GetValue(SurfaceTintColorProperty);
-        set => SetValue(SurfaceTintColorProperty, value);
+        get => _surfaceTintColor.Current;
+        set => _surfaceTintColor.Target = value;
+    }
+
+    public SKColor StateOverlayColor
+    {
+        get => _stateOverlayColor.Current;
+        set => _stateOverlayColor.Target = value;
     }
     
-    public Color? ShadowColor
+    public SKColor ShadowColor
     {
-        get => (Color?)GetValue(ShadowColorProperty);
-        set => SetValue(ShadowColorProperty, value);
+        get => _shadowColor.Current;
+        set => _shadowColor.Target = value;
     }
 
-    private static void Invalidate(BindableObject bindableObject, object oldValue, object newValue) 
-        => ((Material)bindableObject)._canvasView.InvalidateSurface();
+    protected SKRoundRect BoundingRect { get; } = new();
 
-    private void OnTouch(object? sender, SKTouchEventArgs e)
+    protected MaterialState? State { get; private set; }
+
+    protected virtual void OnTouch(object? sender, SKTouchEventArgs e)
     {
-        e.Handled = true;
-        bool isInside = _rrect!.Contains(new(e.Location.X, e.Location.Y, e.Location.X + 1, e.Location.Y + 1));
-        if ((e.InContact && isInside) == _prevInContact) return;
-        _prevInContact = e.InContact && isInside;
-        Elevation = _prevInContact ? 3 : 0;
-        if (_prevInContact)
+        SKPoint location = e.Location;
+        location.Offset(-40, -40);
+
+        bool isInside = BoundingRect!.Contains(new(location.X, location.Y, location.X + 1, location.Y + 1));
+
+        MaterialState? prevState = State;
+
+        switch (e.ActionType)
         {
-            _touchPoint = e.Location;
+            case SKTouchAction.Pressed:
+                if (!isInside) break;
+                State = MaterialState.Pressed;
+                _touchPoint = e.Location;
+                _touchPoint.Offset(-40, -40);
+                break;
+            case SKTouchAction.Entered:
+                if (isInside) State = MaterialState.Hovered;
+                e.Handled = true;
+                break;
+            case SKTouchAction.Released:
+                if (isInside && State == MaterialState.Pressed)
+                {
+                    // TODO: Handle released
+                }
+                State = isInside && e.DeviceType != SKTouchDeviceType.Pen
+                    ? MaterialState.Hovered
+                    : null;
+                e.Handled = isInside;
+                break;
+            case SKTouchAction.Cancelled:
+            case SKTouchAction.Exited:
+                State = null;
+                e.Handled = true;
+                break;
+            case SKTouchAction.Moved:
+                if (isInside && State == null) State = MaterialState.Hovered;
+                if (!isInside) State = null;
+                e.Handled = true;
+                break;
+            case SKTouchAction.WheelChanged:
+            default:
+                break;
+        }
+
+        if (prevState != State) OnStateChanged(prevState);
+    }
+
+    protected virtual void OnStateChanged(MaterialState? previousState)
+    {
+        if (State == MaterialState.Pressed)
+        {
             this.AbortAnimation("rippleOut");
             _rippleProgressOut = 0;
-            this.Animate("rippleIn", new Animation(p => { _rippleProgressIn = (float)p; _canvasView.InvalidateSurface(); }), 6, length: 200);
+            this.Animate("rippleIn", new Animation(p => { _rippleProgressIn = (float)p; _overlayCanvasView.InvalidateSurface(); }), 6, length: 200);
         }
-        else
+        else if (previousState == MaterialState.Pressed)
         {
-            this.Animate("rippleOut", new Animation(p => { _rippleProgressOut = (float)p; _canvasView.InvalidateSurface(); }), length: 250);
+            this.Animate("rippleOut", new Animation(p => { _rippleProgressOut = (float)p; _overlayCanvasView.InvalidateSurface(); }), length: 250);
         }
+
+        _stateOverlayOpacity.Target = State switch
+        {
+            MaterialState.Pressed => .12f,
+            MaterialState.Focused => .12f,
+            MaterialState.Hovered => .08f,
+            _ => 0
+        };
     }
 
-    private void Draw(object? sender, SKPaintSurfaceEventArgs e)
+    protected virtual void DrawBackground(SKCanvas canvas)
     {
-        SKCanvas canvas = e.Surface.Canvas;
-        SKRect rect = canvas.DeviceClipBounds;
-        rect = new(rect.Left + 40, rect.Top + 40, rect.Right - 40, rect.Bottom - 40);
-
-        SKRoundRect rrect = new(rect);
-        rrect.SetRectRadii(rect, new[]
-        {
-            new SKPoint((float)CornerRadius.TopLeft, (float)CornerRadius.TopLeft),
-            new SKPoint((float)CornerRadius.TopRight, (float)CornerRadius.TopRight),
-            new SKPoint((float)CornerRadius.BottomRight, (float)CornerRadius.BottomRight),
-            new SKPoint((float)CornerRadius.BottomLeft, (float)CornerRadius.BottomLeft),
-        });
-        _rrect = rrect;
         canvas.Clear();
 
-        if (_elevation?.Current > 0 && ShadowColor != null)
+        if (Elevation > 0 && ShadowColor.Alpha != 0)
         {
-            SurfaceShadowData surfaceShadowData = Maui.Material.Shadow.ComputeShadow(rect, _elevation.Current)!.Value;
-            SKRoundRect shadowBounds = new();
-            shadowBounds.SetRectRadii(
-                rect,
-                //new(
-                //    rect.Left + shadow.Spread,
-                //    rect.Top + shadow.Spread,
-                //    rect.Right - shadow.Spread,
-                //    rect.Bottom - shadow.Spread
-                //), 
-                rrect.Radii);
+            SurfaceShadowData surfaceShadowData = Maui.Material.Shadow.ComputeShadow(BoundingRect.Rect, Elevation)!.Value;
             using SKPaint paint = new()
             {
                 ImageFilter = SKImageFilter.CreateDropShadowOnly(
@@ -120,15 +185,32 @@ public partial class Material : Layout
                     surfaceShadowData.Offset.Y,
                     surfaceShadowData.BlurRadius,
                     surfaceShadowData.BlurRadius,
-                    Maui.Material.Shadow.ToShadowColor(ShadowColor.ToSKColor()))
+                    Maui.Material.Shadow.ToShadowColor(ShadowColor))
             };
-            canvas.DrawRoundRect(shadowBounds, paint);
+            canvas.DrawRoundRect(BoundingRect, paint);
         }
         
-        if (Color != null)
-            canvas.DrawRoundRect(rrect, new() { Color = ElevationOverlay.ApplySurfaceTint(Color.ToSKColor(), SurfaceTintColor?.ToSKColor(), _elevation.Current), IsAntialias = true });
+        if (Color.Alpha != 0)
+        {
+            canvas.DrawRoundRect(
+                BoundingRect,
+                new()
+                {
+                    Color = ElevationOverlay.ApplySurfaceTint(Color, SurfaceTintColor, Elevation),
+                    IsAntialias = true
+                }
+            );
+        }
+    }
 
-        // R I P P L E
+    protected virtual void DrawOverlay(SKCanvas canvas)
+    {
+        canvas.Clear();
+        canvas.DrawRoundRect(BoundingRect, new() { Color = StateOverlayColor.WithAlpha((byte)(_stateOverlayOpacity.Current * 255)) });
+
+        if (_rippleProgressIn == 0) return;
+
+        SKRect rect = BoundingRect.Rect;
         float endX = rect.MidX;
         float endY = rect.MidY;
         float p = MathF.Pow(_rippleProgressIn, .7f);
@@ -144,17 +226,26 @@ public partial class Material : Layout
             Shader = SKShader.CreateRadialGradient(
                 new(x, y),
                 r,
-                new[] { SurfaceTintColor.ToSKColor().WithAlpha((byte)((1 - _rippleProgressOut) * .12f * 255)), SurfaceTintColor.ToSKColor().WithAlpha(0) },
+                new[] { StateOverlayColor.WithAlpha((byte)((1 - _rippleProgressOut) * .12f * 255)), StateOverlayColor.WithAlpha(0) },
                 new[] { .05f + MathF.Pow(p, .33f) * .75f, 1f },
                 SKShaderTileMode.Clamp)
         };
-        canvas.ClipRoundRect(rrect);
+
+        canvas.ClipRoundRect(BoundingRect);
         canvas.DrawCircle(new(x, y), r, ripplePaint);
     }
 
-    private static void OnElevationPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+    protected override void OnSizeAllocated(double width, double height)
     {
-        Material material = (Material)bindable;
-        material._elevation.Target = (float)newValue;
+        base.OnSizeAllocated(width, height);
+        UpdateBoundingRect();
+    }
+
+    private void UpdateBoundingRect()
+    {
+        BoundingRect.SetRectRadii(
+            new(0, 0, (float)Bounds.Width, (float)Bounds.Height),
+            _cornerRadii
+        );
     }
 }

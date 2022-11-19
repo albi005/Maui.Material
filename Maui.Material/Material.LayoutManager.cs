@@ -17,7 +17,7 @@ public partial class Material
         {
             foreach (IView view in _layout)
             {
-                if (view is SKCanvasView)
+                if (view == _layout._materialCanvasView || view == _layout._overlayCanvasView)
                     view.Arrange(new(bounds.X - 40, bounds.Y - 40, bounds.Width + 80, bounds.Height + 80));
                 else
                     view.Arrange(
@@ -36,7 +36,7 @@ public partial class Material
             Size measure = _layout.Children
                 .FirstOrDefault(x => x is not SKCanvasView)?
                 .Measure(widthConstraint - _layout.Padding.HorizontalThickness, heightConstraint - _layout.Padding.VerticalThickness)
-                ?? new();
+                ?? new(-_layout.Padding.HorizontalThickness, -_layout.Padding.VerticalThickness);
             measure.Width += _layout.Padding.HorizontalThickness;
             measure.Height += _layout.Padding.VerticalThickness;
             return measure;

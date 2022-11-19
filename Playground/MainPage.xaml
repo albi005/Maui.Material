@@ -5,16 +5,20 @@
              x:Class="Playground.MainPage" Padding="0"
              Shell.BackgroundColor="{DynamicResource Surface2}"
              BackgroundColor="{DynamicResource Background}">
-    <m:Material
-        Elevation="0"
-        CornerRadius="100, 100, 0, 100"
-        Color="{DynamicResource SurfaceVariant}"
-        SurfaceTintColor="{DynamicResource OnSurface}"
-        ShadowColor="{DynamicResource Shadow}" Padding="20" HorizontalOptions="Center" VerticalOptions="Center">
+    <m:Button
+        Elevation="10"
+        CornerRadius="32, 32, 0, 32"
+        Color="{DynamicResource PrimaryContainer}"
+        SurfaceTintColor="{DynamicResource Primary}"
+        ContentColor="{DynamicResource OnPrimaryContainer}"
+        ShadowColor="{DynamicResource Shadow}"
+        Padding="8" Margin="32">
         <!--<Grid>
             <Image Source="file://C:\Users\ragan\OneDrive\Untitled.png" InputTransparent="True" ZIndex="0" Opacity=".5" Aspect="AspectFit" />
         </Grid>-->
-        <Label Text="Hello, World!" TextColor="{DynamicResource OnSurface}" InputTransparent="True" />
-        <!--<Image Source="https://i.redd.it/8ygn2eoe8p0a1.jpg" InputTransparent="True" ZIndex="0" Aspect="Fill" Opacity=".5" />-->
-    </m:Material>
+        <!--<Border StrokeShape="RoundRectangle 32,32,0,32">
+            <Image Source="https://i.redd.it/8ygn2eoe8p0a1.jpg" InputTransparent="True" ZIndex="0" Aspect="AspectFit" Opacity="1" />
+        </Border>-->
+        <Label Text="asd" TextColor="{DynamicResource OnPrimaryContainer}" VerticalOptions="Center" HorizontalOptions="Center" />
+    </m:Button>
 </ContentPage>

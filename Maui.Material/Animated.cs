@@ -1,63 +1,101 @@
-﻿namespace Maui.Material;
+﻿using SkiaSharp;
 
-public class Animated
+namespace Maui.Material;
+
+public class AnimatedFloat : Animated<float>
 {
- 
-    private readonly Material _material;
+    public AnimatedFloat(IAnimatable animatable, Action invalidate, float initialValue, uint length)
+        : base(animatable, invalidate, initialValue, length)
+    {
+    }
+
+    protected override float Lerp(double progress)
+        => Start + (Target - Start) * (float)progress;
+}
+
+public class AnimatedColor : Animated<SKColor>
+{
+    public AnimatedColor(IAnimatable animatable, Action invalidate, SKColor initialValue, uint length)
+        : base(animatable, invalidate, initialValue, length)
+    {
+    }
+
+    protected override SKColor Lerp(double progress) => new(
+        (byte)(Start.Red + (Target.Red - Start.Red) * progress),
+        (byte)(Start.Green + (Target.Green - Start.Green) * progress),
+        (byte)(Start.Blue + (Target.Blue - Start.Blue) * progress),
+        (byte)(Start.Alpha + (Target.Alpha - Start.Alpha) * progress)
+    );
+}
+
+public class AnimatedCornerRadius : Animated<CornerRadius>
+{
+    public AnimatedCornerRadius(IAnimatable animatable, Action invalidate, CornerRadius initialValue, uint length)
+        : base(animatable, invalidate, initialValue, length)
+    {
+    }
+
+    protected override CornerRadius Lerp(double progress) => new(
+        Start.TopLeft + (Target.TopLeft - Start.TopLeft) * progress,
+        Start.TopRight + (Target.TopRight - Start.TopRight) * progress,
+        Start.BottomLeft + (Target.BottomLeft - Start.BottomLeft) * progress,
+        Start.BottomRight + (Target.BottomRight - Start.BottomRight) * progress
+    );
+}
+
+public abstract class Animated<T>
+{ 
+    private readonly IAnimatable _animatable;
     private readonly string _id = Guid.NewGuid().ToString();
     private readonly Action _invalidate;
-    private readonly float _min;
-    private readonly float _max;
     private readonly uint _length;
 
-    private float _current;
-    private float _target;
-    private bool _hasBeenUsed;
+    private T _current;
+    private T _target;
+    private bool _hasBeenRead;
 
     public Animated(
-        Material material,
+        IAnimatable animatable,
         Action invalidate,
-        float initialValue,
-        float min,
-        float max,
+        T initialValue,
         uint length)
     {
-        _material = material;
+        _animatable = animatable;
+        Start = initialValue;
         _current = initialValue;
-        _min = min;
-        _max = max;
+        _target = initialValue;
         _length = length;
         _invalidate = invalidate;
     }
 
-    public float Start { get; private set; }
+    public T Start { get; private set; }
 
-    public float Current
+    public T Current
     {
         get
         {
-            _hasBeenUsed = true;
+            _hasBeenRead = true;
             return _current;
         }
     }
 
-    public float Target
+    public T Target
     {
         get => _target;
         set
         {
+            if (_target?.Equals(value) == true) return;
+
             _target = value;
 
-            if (_hasBeenUsed)
+            if (_hasBeenRead)
             {
                 Start = _current;
-                uint length = _length;
-                // uint length = (uint)(MathF.Abs(_target - _start) / (_max - _min) * _length);
-                _material.Animate(_id, p =>
+                _animatable.Animate(_id, p =>
                 {
-                    _current = (float)p;
+                    _current = Lerp(p);
                     _invalidate();
-                }, Start, _target, length: length);
+                }, length: _length);
             }
             else
             {
@@ -67,4 +105,6 @@ public class Animated
             }
         }
     }
+
+    protected abstract T Lerp(double progress);
 }
