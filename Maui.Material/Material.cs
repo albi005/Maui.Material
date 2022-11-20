@@ -8,6 +8,7 @@ namespace Maui.Material;
 public abstract partial class Material : Layout
 {
     private readonly SKCanvasView _materialCanvasView;
+    private readonly SKCanvasView _touchCanvasView;
     private readonly SKCanvasView _overlayCanvasView;
     private readonly AnimatedFloat _elevation;
     private readonly AnimatedCornerRadius _cornerRadius;
@@ -33,9 +34,12 @@ public abstract partial class Material : Layout
         };
         Children.Add(_materialCanvasView);
 
-        _overlayCanvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true/*, ZIndex = 2*/ };
+        _touchCanvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true };
+        _touchCanvasView.Touch += OnTouch;
+        Children.Add(_touchCanvasView);
+
+        _overlayCanvasView = new() { InputTransparent = true, IgnorePixelScaling = true, ZIndex = 100 };
         _overlayCanvasView.PaintSurface += (_, e) => DrawOverlay(e.Surface.Canvas);
-        _overlayCanvasView.Touch += OnTouch;
         Children.Add(_overlayCanvasView);
 
         _elevation = new(this, _materialCanvasView.InvalidateSurface, 0, 180);
@@ -117,7 +121,7 @@ public abstract partial class Material : Layout
                     Debug.WriteLine("CLICKED!");
                     // TODO: Handle released
                 }
-                State = e.DeviceType != SKTouchDeviceType.Pen
+                State = e.DeviceType != SKTouchDeviceType.Touch
                     ? MaterialState.Hovered
                     : null;
                 e.Handled = true;
@@ -125,11 +129,10 @@ public abstract partial class Material : Layout
             case SKTouchAction.Cancelled:
             case SKTouchAction.Exited:
                 State = null;
-                e.Handled = true;
                 break;
             case SKTouchAction.Moved:
                 if (SKPoint.Distance(_touchPoint, e.Location) > 15)
-                    State = e.DeviceType != SKTouchDeviceType.Pen
+                    State = e.DeviceType != SKTouchDeviceType.Touch
                         ? MaterialState.Hovered
                         : null;
                 break;
@@ -151,7 +154,7 @@ public abstract partial class Material : Layout
         }
         else if (previousState == MaterialState.Pressed)
         {
-            this.Animate("rippleOut", p => { _rippleProgressOut = (float)p; _overlayCanvasView.InvalidateSurface(); }, length: 250);
+            this.Animate("rippleOut", p => { _rippleProgressOut = (float)p; _overlayCanvasView.InvalidateSurface(); }, length: 400);
         }
 
         _stateOverlayOpacity.Target = State switch

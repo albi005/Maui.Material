@@ -69,7 +69,7 @@ public class Button : Material
         base.OnStateChanged(previousState);
         base.Elevation = State switch
         {
-            MaterialState.Pressed => 12,
+            MaterialState.Pressed => 3,
             MaterialState.Hovered => 1,
             _ => 0
         };
