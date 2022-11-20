@@ -2,23 +2,36 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:m="clr-namespace:Maui.Material;assembly=Maui.Material"
+             xmlns:sk="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              x:Class="Playground.MainPage" Padding="0"
              Shell.BackgroundColor="{DynamicResource Surface2}"
              BackgroundColor="{DynamicResource Background}">
-    <m:Button
-        Elevation="10"
-        CornerRadius="32, 32, 0, 32"
-        Color="{DynamicResource PrimaryContainer}"
-        SurfaceTintColor="{DynamicResource Primary}"
-        ContentColor="{DynamicResource OnPrimaryContainer}"
-        ShadowColor="{DynamicResource Shadow}"
-        Padding="8" Margin="32">
-        <!--<Grid>
-            <Image Source="file://C:\Users\ragan\OneDrive\Untitled.png" InputTransparent="True" ZIndex="0" Opacity=".5" Aspect="AspectFit" />
-        </Grid>-->
-        <!--<Border StrokeShape="RoundRectangle 32,32,0,32">
-            <Image Source="https://i.redd.it/8ygn2eoe8p0a1.jpg" InputTransparent="True" ZIndex="0" Aspect="AspectFit" Opacity="1" />
-        </Border>-->
-        <Label Text="asd" TextColor="{DynamicResource OnPrimaryContainer}" VerticalOptions="Center" HorizontalOptions="Center" />
+    <m:Button Margin="32" Color="{DynamicResource Surface}" SurfaceTintColor="{DynamicResource Primary}" ContentColor="{DynamicResource OnSurface}" CornerRadius="32">
+        <m:Button
+            Elevation="0"
+            CornerRadius="32, 32, 0, 32"
+            Color="{DynamicResource PrimaryContainer}"
+            SurfaceTintColor="{DynamicResource Primary}"
+            ContentColor="{DynamicResource OnPrimaryContainer}"
+            ShadowColor="{DynamicResource Shadow}"
+            Padding="32" Margin="100" HorizontalOptions="Center" VerticalOptions="Center">
+            <!--<Grid>
+                <Image Source="file://C:\Users\ragan\OneDrive\Untitled.png" InputTransparent="True" ZIndex="0" Opacity=".5" Aspect="AspectFit" />
+            </Grid>
+            <Border StrokeShape="RoundRectangle 32,32,0,32">
+                <Image Source="https://i.redd.it/8ygn2eoe8p0a1.jpg" InputTransparent="True" ZIndex="0" Aspect="AspectFit" Opacity="1" />
+            </Border>-->
+            <Label Text="asd" FontSize="16" TextColor="{DynamicResource OnPrimaryContainer}" VerticalOptions="Center" HorizontalOptions="Center" />
+        </m:Button>
+        <!--<Button Text="asd"
+                BackgroundColor="{DynamicResource TertiaryContainer}" TextColor="{DynamicResource OnTertiaryContainer}" VerticalOptions="Center" HorizontalOptions="Center" Padding="100" />-->
     </m:Button>
+    <!--<Grid Padding="20">
+        <sk:SKCanvasView EnableTouchEvents="True" Touch="SKCanvasView_Touch" BackgroundColor="DarkBlue" />
+        --><!--<Button BackgroundColor="LightBlue" />--><!--
+        <Grid Padding="20">
+            <sk:SKCanvasView EnableTouchEvents="False" BackgroundColor="DarkGreen" InputTransparent="True" />
+            --><!--<Button BackgroundColor="LightGreen" CornerRadius="100" />--><!--
+        </Grid>
+    </Grid>-->
 </ContentPage>

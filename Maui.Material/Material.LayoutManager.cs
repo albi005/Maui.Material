@@ -17,8 +17,10 @@ public partial class Material
         {
             foreach (IView view in _layout)
             {
-                if (view == _layout._materialCanvasView || view == _layout._overlayCanvasView)
+                if (view == _layout._materialCanvasView)
                     view.Arrange(new(bounds.X - 40, bounds.Y - 40, bounds.Width + 80, bounds.Height + 80));
+                else if (view == _layout._overlayCanvasView)
+                    view.Arrange(bounds);
                 else
                     view.Arrange(
                         new(
@@ -26,6 +28,8 @@ public partial class Material
                             bounds.Y + _layout.Padding.Top,
                             bounds.Width - _layout.Padding.Right * 2,
                             bounds.Height - _layout.Padding.Bottom * 2));
+                if (view is Material material)
+                    material.ZIndex = 10;
             }
 
             return new(1000, 1000);

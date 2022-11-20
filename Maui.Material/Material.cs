@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using SkiaSharp.Views.Maui;
 using SkiaSharp.Views.Maui.Controls;
+using System.Diagnostics;
 
 namespace Maui.Material;
 
@@ -23,7 +24,7 @@ public abstract partial class Material : Layout
 
     public Material()
     {        
-        _materialCanvasView = new() { IgnorePixelScaling = true };
+        _materialCanvasView = new() { IgnorePixelScaling = true, InputTransparent = true };
         _materialCanvasView.PaintSurface += (_, e) =>
         {
             SKCanvas canvas = e.Surface.Canvas;
@@ -32,13 +33,8 @@ public abstract partial class Material : Layout
         };
         Children.Add(_materialCanvasView);
 
-        _overlayCanvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true, ZIndex = 1 };
-        _overlayCanvasView.PaintSurface += (_, e) =>
-        {
-            SKCanvas canvas = e.Surface.Canvas;
-            canvas.Translate(40, 40);
-            DrawOverlay(canvas);
-        };
+        _overlayCanvasView = new() { EnableTouchEvents = true, IgnorePixelScaling = true/*, ZIndex = 2*/ };
+        _overlayCanvasView.PaintSurface += (_, e) => DrawOverlay(e.Surface.Canvas);
         _overlayCanvasView.Touch += OnTouch;
         Children.Add(_overlayCanvasView);
 
@@ -52,6 +48,7 @@ public abstract partial class Material : Layout
             _cornerRadii[3] = CreatePoint(CornerRadius.BottomLeft);
             UpdateBoundingRect();
             _materialCanvasView.InvalidateSurface();
+            _overlayCanvasView.InvalidateSurface();
         }, new(), 180);
         _color = new(this, _materialCanvasView.InvalidateSurface, SKColor.Empty, 180);
         _surfaceTintColor = new(this, _materialCanvasView.InvalidateSurface, SKColor.Empty, 180);
@@ -102,34 +99,28 @@ public abstract partial class Material : Layout
 
     protected virtual void OnTouch(object? sender, SKTouchEventArgs e)
     {
-        SKPoint location = e.Location;
-        location.Offset(-40, -40);
-
-        bool isInside = BoundingRect!.Contains(new(location.X, location.Y, location.X + 1, location.Y + 1));
-
         MaterialState? prevState = State;
-
         switch (e.ActionType)
         {
             case SKTouchAction.Pressed:
-                if (!isInside) break;
                 State = MaterialState.Pressed;
                 _touchPoint = e.Location;
-                _touchPoint.Offset(-40, -40);
+                e.Handled = true;
                 break;
             case SKTouchAction.Entered:
-                if (isInside) State = MaterialState.Hovered;
+                State = MaterialState.Hovered;
                 e.Handled = true;
                 break;
             case SKTouchAction.Released:
-                if (isInside && State == MaterialState.Pressed)
+                if (State == MaterialState.Pressed)
                 {
+                    Debug.WriteLine("CLICKED!");
                     // TODO: Handle released
                 }
-                State = isInside && e.DeviceType != SKTouchDeviceType.Pen
+                State = e.DeviceType != SKTouchDeviceType.Pen
                     ? MaterialState.Hovered
                     : null;
-                e.Handled = isInside;
+                e.Handled = true;
                 break;
             case SKTouchAction.Cancelled:
             case SKTouchAction.Exited:
@@ -137,9 +128,10 @@ public abstract partial class Material : Layout
                 e.Handled = true;
                 break;
             case SKTouchAction.Moved:
-                if (isInside && State == null) State = MaterialState.Hovered;
-                if (!isInside) State = null;
-                e.Handled = true;
+                if (SKPoint.Distance(_touchPoint, e.Location) > 15)
+                    State = e.DeviceType != SKTouchDeviceType.Pen
+                        ? MaterialState.Hovered
+                        : null;
                 break;
             case SKTouchAction.WheelChanged:
             default:
@@ -155,11 +147,11 @@ public abstract partial class Material : Layout
         {
             this.AbortAnimation("rippleOut");
             _rippleProgressOut = 0;
-            this.Animate("rippleIn", new Animation(p => { _rippleProgressIn = (float)p; _overlayCanvasView.InvalidateSurface(); }), 6, length: 200);
+            this.Animate("rippleIn", p => { _rippleProgressIn = (float)p; _overlayCanvasView.InvalidateSurface(); }, 6, length: 200);
         }
         else if (previousState == MaterialState.Pressed)
         {
-            this.Animate("rippleOut", new Animation(p => { _rippleProgressOut = (float)p; _overlayCanvasView.InvalidateSurface(); }), length: 250);
+            this.Animate("rippleOut", p => { _rippleProgressOut = (float)p; _overlayCanvasView.InvalidateSurface(); }, length: 250);
         }
 
         _stateOverlayOpacity.Target = State switch
@@ -213,13 +205,13 @@ public abstract partial class Material : Layout
         SKRect rect = BoundingRect.Rect;
         float endX = rect.MidX;
         float endY = rect.MidY;
-        float p = MathF.Pow(_rippleProgressIn, .7f);
+        float p = _rippleProgressIn;
         float x = _touchPoint.X + (endX - _touchPoint.X) * p;
         float y = _touchPoint.Y + (endY - _touchPoint.Y) * p;
         float xDist = rect.Width / 2;
         float yDist = rect.Height / 2;
         float cornerDist = MathF.Sqrt(xDist * xDist + yDist * yDist);
-        float r = p * cornerDist * 1.25f;
+        float r = MathF.Pow(p, .7f) * cornerDist * 1.25f;
 
         SKPaint ripplePaint = new()
         {
