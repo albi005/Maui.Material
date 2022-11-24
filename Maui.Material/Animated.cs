@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+﻿using Microsoft.Maui.Animations;
 
 namespace Maui.Material;
 
@@ -13,19 +13,14 @@ public class AnimatedFloat : Animated<float>
         => Start + (Target - Start) * (float)progress;
 }
 
-public class AnimatedColor : Animated<SKColor>
+public class AnimatedColor : Animated<Color>
 {
-    public AnimatedColor(IAnimatable animatable, Action invalidate, SKColor initialValue, uint length)
+    public AnimatedColor(IAnimatable animatable, Action invalidate, Color initialValue, uint length)
         : base(animatable, invalidate, initialValue, length)
     {
     }
 
-    protected override SKColor Lerp(double progress) => new(
-        (byte)(Start.Red + (Target.Red - Start.Red) * progress),
-        (byte)(Start.Green + (Target.Green - Start.Green) * progress),
-        (byte)(Start.Blue + (Target.Blue - Start.Blue) * progress),
-        (byte)(Start.Alpha + (Target.Alpha - Start.Alpha) * progress)
-    );
+    protected override Color Lerp(double progress) => Start.Lerp(Target, progress);
 }
 
 public class AnimatedCornerRadius : Animated<CornerRadius>
@@ -105,6 +100,8 @@ public abstract class Animated<T>
             }
         }
     }
+
+    public void Reset() => _hasBeenRead = false;
 
     protected abstract T Lerp(double progress);
 }

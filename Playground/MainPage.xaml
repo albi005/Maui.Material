@@ -7,141 +7,42 @@
     x:Class="Playground.MainPage"
     Shell.BackgroundColor="{DynamicResource Surface2}"
     Shell.TitleColor="{DynamicResource OnSurface}"
-    BackgroundColor="{DynamicResource Background}">
-    <ScrollView>
-        <VerticalStackLayout Spacing="8" Padding="8">
-            <m:Button
-                Color="{DynamicResource SurfaceVariant}"
-                SurfaceTintColor="{DynamicResource Primary}"
-                ContentColor="{DynamicResource OnSurfaceVariant}"
-                ShadowColor="{DynamicResource Shadow}"
-                CornerRadius="12">
-                <Grid RowDefinitions="*,72">
-                    <m:Button CornerRadius="12" ContentColor="{DynamicResource OnSurfaceVariant}">
-                        <Border StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                            <Image Source="https://www.nasa.gov/sites/default/files/thumbnails/image/blackhole.png" InputTransparent="True" />
-                        </Border>
-                    </m:Button>
-                    <m:Button
-                        HorizontalOptions="End"
-                        VerticalOptions="Center"
-                        HeightRequest="40"
-                        Padding="24,0"
-                        Margin="16"
-                        Grid.Row="1"
-                        CornerRadius="20"
-                        Color="{DynamicResource Primary}"
-                        SurfaceTintColor="{DynamicResource Primary}"
-                        ContentColor="{DynamicResource OnPrimary}">
-                        <Label
-                            InputTransparent="True"
-                            Text="Action"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{DynamicResource OnPrimary}"
-                            VerticalTextAlignment="Center" />
-                    </m:Button>
-                </Grid>
+    BackgroundColor="{DynamicResource Background}"
+    Padding="32">
+    <m:Button
+        Elevation="1"
+        Color="{DynamicResource Surface}"
+        SurfaceTintColor="{DynamicResource Primary}"
+        ContentColor="{DynamicResource OnSurface}"
+        ShadowColor="{DynamicResource Shadow}"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        CornerRadius="12">
+        <Grid RowDefinitions="*,72">
+            <m:Button CornerRadius="12" ContentColor="{DynamicResource OnSurfaceVariant}">
+                <Border StrokeShape="RoundRectangle 12" StrokeThickness="0">
+                    <Image Source="https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/main_image_star-forming_region_carina_nircam_final-5mb.jpg" InputTransparent="True" />
+                </Border>
             </m:Button>
             <m:Button
-                Color="{DynamicResource SurfaceVariant}"
+                HorizontalOptions="End"
+                VerticalOptions="Center"
+                HeightRequest="40"
+                Padding="24,0"
+                Margin="16"
+                Grid.Row="1"
+                CornerRadius="20"
+                Color="{DynamicResource Primary}"
                 SurfaceTintColor="{DynamicResource Primary}"
-                ContentColor="{DynamicResource OnSurfaceVariant}"
-                ShadowColor="{DynamicResource Shadow}"
-                CornerRadius="12">
-                <Grid RowDefinitions="*,72">
-                    <m:Button CornerRadius="12" ContentColor="{DynamicResource OnSurfaceVariant}">
-                        <Border StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                            <Image Source="https://www.nasa.gov/sites/default/files/thumbnails/image/blackhole.png" InputTransparent="True" />
-                        </Border>
-                    </m:Button>
-                    <m:Button
-                        HorizontalOptions="End"
-                        VerticalOptions="Center"
-                        HeightRequest="40"
-                        Padding="24,0"
-                        Margin="16"
-                        Grid.Row="1"
-                        CornerRadius="20"
-                        Color="{DynamicResource Primary}"
-                        SurfaceTintColor="{DynamicResource Primary}"
-                        ContentColor="{DynamicResource OnPrimary}">
-                        <Label
-                            InputTransparent="True"
-                            Text="Action"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{DynamicResource OnPrimary}"
-                            VerticalTextAlignment="Center" />
-                    </m:Button>
-                </Grid>
+                ContentColor="{DynamicResource OnPrimary}">
+                <Label
+                    InputTransparent="True"
+                    Text="Action"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="{DynamicResource OnPrimary}"
+                    VerticalTextAlignment="Center" />
             </m:Button>
-            <m:Button
-                Color="{DynamicResource SurfaceVariant}"
-                SurfaceTintColor="{DynamicResource Primary}"
-                ContentColor="{DynamicResource OnSurfaceVariant}"
-                ShadowColor="{DynamicResource Shadow}"
-                CornerRadius="12">
-                <Grid RowDefinitions="*,72">
-                    <m:Button CornerRadius="12" ContentColor="{DynamicResource OnSurfaceVariant}">
-                        <Border StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                            <Image Source="https://www.nasa.gov/sites/default/files/thumbnails/image/blackhole.png" InputTransparent="True" />
-                        </Border>
-                    </m:Button>
-                    <m:Button
-                        HorizontalOptions="End"
-                        VerticalOptions="Center"
-                        HeightRequest="40"
-                        Padding="24,0"
-                        Margin="16"
-                        Grid.Row="1"
-                        CornerRadius="20"
-                        Color="{DynamicResource Primary}"
-                        SurfaceTintColor="{DynamicResource Primary}"
-                        ContentColor="{DynamicResource OnPrimary}">
-                        <Label
-                            InputTransparent="True"
-                            Text="Action"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{DynamicResource OnPrimary}"
-                            VerticalTextAlignment="Center" />
-                    </m:Button>
-                </Grid>
-            </m:Button>
-            <m:Button
-                Color="{DynamicResource SurfaceVariant}"
-                SurfaceTintColor="{DynamicResource Primary}"
-                ContentColor="{DynamicResource OnSurfaceVariant}"
-                ShadowColor="{DynamicResource Shadow}"
-                CornerRadius="12">
-                <Grid RowDefinitions="*,72">
-                    <m:Button CornerRadius="12" ContentColor="{DynamicResource OnSurfaceVariant}">
-                        <Border StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                            <Image Source="https://www.nasa.gov/sites/default/files/thumbnails/image/blackhole.png" InputTransparent="True" />
-                        </Border>
-                    </m:Button>
-                    <m:Button
-                        HorizontalOptions="End"
-                        VerticalOptions="Center"
-                        HeightRequest="40"
-                        Padding="24,0"
-                        Margin="16"
-                        Grid.Row="1"
-                        CornerRadius="20"
-                        Color="{DynamicResource Primary}"
-                        SurfaceTintColor="{DynamicResource Primary}"
-                        ContentColor="{DynamicResource OnPrimary}">
-                        <Label
-                            InputTransparent="True"
-                            Text="Action"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{DynamicResource OnPrimary}"
-                            VerticalTextAlignment="Center" />
-                    </m:Button>
-                </Grid>
-            </m:Button>
-        </VerticalStackLayout>
-    </ScrollView>
+        </Grid>
+    </m:Button>
 </ContentPage>

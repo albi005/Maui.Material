@@ -1,5 +1,4 @@
 ﻿using MaterialColorUtilities.Utils;
-using SkiaSharp;
 
 namespace Maui.Material;
 
@@ -15,8 +14,8 @@ public static class ElevationOverlay
         new(12, .14f)
     };
 
-    public static SKColor ApplySurfaceTint(SKColor color, SKColor? surfaceTint, float elevation)
-        => surfaceTint != null ? ((uint)color).Add((uint)surfaceTint, SurfaceTintOpacityForElevation(elevation)) : color;
+    public static Color ApplySurfaceTint(Color color, Color? surfaceTint, float elevation)
+        => surfaceTint != null ? Color.FromUint(color.ToUint().Add(surfaceTint.ToUint(), SurfaceTintOpacityForElevation(elevation))) : color;
 
     private static float SurfaceTintOpacityForElevation(float elevation)
     {

@@ -1,6 +1,5 @@
 ﻿using MaterialColorUtilities.Maui;
 using Microsoft.Extensions.Logging;
-using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace Playground;
 
@@ -10,7 +9,6 @@ public static class MauiProgram
 	{
 		var builder = MauiApp.CreateBuilder()
 			.UseMauiApp<App>()
-			.UseSkiaSharp()
 			.UseMaterialColors()
 			.ConfigureFonts(fonts =>
 			{

@@ -20,7 +20,6 @@
 
 	<ItemGroup>
 	  <PackageReference Include="MaterialColorUtilities" Version="0.2.0" />
-	  <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.3" />
 	</ItemGroup>
 
 </Project>

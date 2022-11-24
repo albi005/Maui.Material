@@ -1,5 +1,4 @@
 ﻿using Microsoft.Maui.Layouts;
-using SkiaSharp.Views.Maui.Controls;
 
 namespace Maui.Material;
 
@@ -19,9 +18,9 @@ public partial class Material
         {
             foreach (IView view in Layout)
             {
-                if (view == Material._materialCanvasView)
-                    view.Arrange(new(bounds.X - 40, bounds.Y - 40, bounds.Width + 80, bounds.Height + 80));
-                else if (view == Material._touchCanvasView || view == Material._overlayCanvasView)
+                if (view == Material._backgroundView)
+                    view.Arrange(bounds.Inflate(40, 40));
+                else if (view == Material._touchView || view == Material._overlayView)
                     view.Arrange(bounds);
                 else
                     view.Arrange(
@@ -38,7 +37,7 @@ public partial class Material
         public override Size Measure(double widthConstraint, double heightConstraint)
         {
             Size measure = Layout
-                .FirstOrDefault(x => x is not SKCanvasView)?
+                .FirstOrDefault(x => x is not GraphicsView)?
                 .Measure(widthConstraint - Layout.Padding.HorizontalThickness, heightConstraint - Layout.Padding.VerticalThickness)
                 ?? new(-Layout.Padding.HorizontalThickness, -Layout.Padding.VerticalThickness);
             measure.Width += Layout.Padding.HorizontalThickness;

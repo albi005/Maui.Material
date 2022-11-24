@@ -1,12 +1,10 @@
-﻿using SkiaSharp.Views.Maui;
-
-namespace Maui.Material;
+﻿namespace Maui.Material;
 
 public class Button : Material
 {
     public static readonly BindableProperty ColorProperty = BindableProperty.Create(
         nameof(Color), typeof(Color), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).Color = ((Color)value).ToSKColor());
+        propertyChanged: (b, _, value) => ((Material)b).Color = (Color)value);
 
     public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
         nameof(CornerRadius), typeof(CornerRadius), typeof(Button),
@@ -18,15 +16,17 @@ public class Button : Material
 
     public static readonly BindableProperty SurfaceTintColorProperty = BindableProperty.Create(
         nameof(SurfaceTintColor), typeof(Color), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).SurfaceTintColor = ((Color)value).ToSKColor());
+        propertyChanged: (b, _, value) => ((Material)b).SurfaceTintColor = (Color)value);
 
     public static readonly BindableProperty ShadowColorProperty = BindableProperty.Create(
         nameof(ShadowColor), typeof(Color), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).ShadowColor = ((Color)value).ToSKColor());
+        propertyChanged: (b, _, value) => ((Material)b).ShadowColor = (Color)value);
 
     public static readonly BindableProperty ContentColorProperty = BindableProperty.Create(
         nameof(ContentColor), typeof(Color), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).StateOverlayColor = ((Color)value).ToSKColor());
+        propertyChanged: (b, _, value) => ((Material)b).StateOverlayColor = (Color)value);
+
+    public Button() => Interactable = true;
 
     public new float Elevation
     {
@@ -69,9 +69,9 @@ public class Button : Material
         base.OnStateChanged(previousState);
         base.Elevation = State switch
         {
-            MaterialState.Pressed => 3,
-            MaterialState.Hovered => 1,
-            _ => 0
+            MaterialState.Pressed => 1,
+            MaterialState.Hovered => 3,
+            _ => 1
         };
     }
 }
