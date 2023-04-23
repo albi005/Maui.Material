@@ -1,38 +1,26 @@
 ﻿namespace Maui.Material;
 
-public class Button : Material
+public class BindableMaterial : Material
 {
     public static readonly BindableProperty ColorProperty = BindableProperty.Create(
-        nameof(Color), typeof(Color), typeof(Button),
+        nameof(Color), typeof(Color), typeof(BindableMaterial),
         propertyChanged: (b, _, value) => ((Material)b).Color = (Color)value);
 
     public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
-        nameof(CornerRadius), typeof(CornerRadius), typeof(Button),
+        nameof(CornerRadius), typeof(CornerRadius), typeof(BindableMaterial),
         propertyChanged: (b, _, value) => ((Material)b).CornerRadius = (CornerRadius)value);
 
-    public static readonly BindableProperty ElevationProperty = BindableProperty.Create(
-        nameof(Elevation), typeof(float), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).Elevation = (float)value);
-
     public static readonly BindableProperty SurfaceTintColorProperty = BindableProperty.Create(
-        nameof(SurfaceTintColor), typeof(Color), typeof(Button),
+        nameof(SurfaceTintColor), typeof(Color), typeof(BindableMaterial),
         propertyChanged: (b, _, value) => ((Material)b).SurfaceTintColor = (Color)value);
 
     public static readonly BindableProperty ShadowColorProperty = BindableProperty.Create(
-        nameof(ShadowColor), typeof(Color), typeof(Button),
+        nameof(ShadowColor), typeof(Color), typeof(BindableMaterial),
         propertyChanged: (b, _, value) => ((Material)b).ShadowColor = (Color)value);
 
-    public static readonly BindableProperty ContentColorProperty = BindableProperty.Create(
-        nameof(ContentColor), typeof(Color), typeof(Button),
-        propertyChanged: (b, _, value) => ((Material)b).StateOverlayColor = (Color)value);
-
-    public Button() => Interactable = true;
-
-    public new float Elevation
-    {
-        get => (float)GetValue(ElevationProperty);
-        set => SetValue(ElevationProperty, value);
-    }
+    public static readonly BindableProperty StateLayerColorProperty = BindableProperty.Create(
+        nameof(StateLayerColor), typeof(Color), typeof(BindableMaterial),
+        propertyChanged: (b, _, value) => ((Material)b).StateLayerColor = (Color)value);
 
     public new CornerRadius CornerRadius
     {
@@ -52,26 +40,15 @@ public class Button : Material
         set => SetValue(SurfaceTintColorProperty, value);
     }
 
-    public Color? ContentColor
+    public new Color? StateLayerColor
     {
-        get => (Color?)GetValue(ContentColorProperty);
-        set => SetValue(ContentColorProperty, value);
+        get => (Color?)GetValue(StateLayerColorProperty);
+        set => SetValue(StateLayerColorProperty, value);
     }
 
     public new Color? ShadowColor
     {
         get => (Color?)GetValue(ShadowColorProperty);
         set => SetValue(ShadowColorProperty, value);
-    }
-
-    protected override void OnStateChanged(MaterialState? previousState)
-    {
-        base.OnStateChanged(previousState);
-        base.Elevation = State switch
-        {
-            MaterialState.Pressed => 1,
-            MaterialState.Hovered => 3,
-            _ => 1
-        };
     }
 }

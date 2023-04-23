@@ -61,7 +61,7 @@ public abstract partial class Material : Layout
         set => _surfaceTintColor.Target = value;
     }
 
-    public Color StateOverlayColor
+    public Color StateLayerColor
     {
         get => _stateOverlayColor.Current;
         set => _stateOverlayColor.Target = value;
@@ -179,7 +179,7 @@ public abstract partial class Material : Layout
 
     protected virtual void DrawOverlay(ICanvas canvas, RectF bounds)
     {
-        canvas.SetFillPaint(new SolidPaint(StateOverlayColor.WithAlpha(_stateOverlayOpacity.Current)), bounds);
+        canvas.SetFillPaint(new SolidPaint(StateLayerColor.WithAlpha(_stateOverlayOpacity.Current)), bounds);
         canvas.FillRoundedRectangle(bounds, CornerRadius);
 
         if (_rippleProgressIn == 0 || _rippleProgressOut == 1) return;
@@ -189,20 +189,23 @@ public abstract partial class Material : Layout
         float y = _touchPoint.Y / bounds.Height;
         x += (.5f - x) * p;
         y += (.5f - y) * p;
-        float r = p * .9f;
+        float r = p * 1;
 
         RadialGradientPaint ripplePaint = new(
             new PaintGradientStop[]
             {
                 new(.5f,
-                    StateOverlayColor.WithAlpha((1 - _rippleProgressOut) * .12f)),
-                new(1, StateOverlayColor.WithAlpha(0))
+                    StateLayerColor.WithAlpha((1 - _rippleProgressOut) * .12f)),
+                new(1, StateLayerColor.WithAlpha(0))
             },
             new(x, y),
             r);
         canvas.SetFillPaint(ripplePaint, bounds);
         canvas.FillRoundedRectangle(bounds, CornerRadius);
     }
+
+    protected void InvalidateBackground() => _backgroundView.Invalidate();
+    protected void InvalidateOverlay() => _overlayView?.Invalidate();
 
     // When recycled as part of a DataTemplate, don't animate.
     protected override void OnBindingContextChanged()
@@ -234,10 +237,4 @@ public abstract partial class Material : Layout
         public OverlayDrawable(Material material) => _material = material;
         public void Draw(ICanvas canvas, RectF dirtyRect) => _material.DrawOverlay(canvas, dirtyRect);
     }
-}
-
-file static class Extensions
-{
-    public static void FillRoundedRectangle(this ICanvas canvas, Rect bounds, CornerRadius r)
-        => canvas.FillRoundedRectangle(bounds, r.TopLeft, r.TopRight, r.BottomLeft, r.BottomRight);
 }
